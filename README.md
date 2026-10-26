@@ -2,7 +2,7 @@
 
 Manage Voice Logica AI phone agents from Claude: agents and their prompts, calls with transcripts and summaries, outbound campaigns, workflows, phone numbers and SIP trunks, integrations, SMS and support tickets.
 
-The plugin connects to the hosted Voice Logica MCP server at https://api.voicelogica.ai/api/v1/mcp. You sign in with your Voice Logica account (OAuth) the first time a tool runs. Every tool acts only on your own company's account.
+The plugin connects to the hosted Voice Logica MCP server at https://api.voicelogica.ai/api/v1/mcp. You sign in with your Voice Logica account (OAuth) the first time a tool runs. Every tool acts only on your own company's account (resellers also on their own client companies); the server refuses any other company. Plan upgrades and seat purchases are never charged from Claude: the tools return a link to the Voice Logica billing page, where you review the price and pay.
 
 ## Install in Claude Code
 
