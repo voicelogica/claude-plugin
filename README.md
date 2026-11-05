@@ -14,7 +14,7 @@ claude plugin install voice-logica@voicelogica
 ## What it includes
 
 - The Voice Logica MCP server (remote, OAuth)
-- 17 skills for building and fixing agents, phones, calls and campaigns, workflows, CRM, e-shop and ERP lookups, calendars, SMS, integrations and support tickets
+- 18 skills for building and fixing agents, phones, calls and campaigns, workflows, CRM, e-shop and ERP lookups, calendars, SMS, integrations and support tickets, and for acting on the instructions your team leaves on calls (`act-on-call-instructions`, which you can also run on a schedule)
 
 You need a Voice Logica account (free sign-up at https://app.voicelogica.ai). Phone calls need a plan with AI minutes.
 
