@@ -9,7 +9,7 @@ After a call, a team member can leave instructions for an AI assistant on it. Th
 
 What you write back on a call (what you did, or a question) shows to the team member in the app under **Live Support → AI assistant**, as a chat with you for that call. They reply there, and their reply comes back to you on the same call.
 
-Confirm the MCP is connected (Connect / OAuth to https://app.voicelogica.ai). Use an API key only if the client has no Connect flow. If `update_call_llm_instructions` or the `llmInstructionsStatus` filter of `get_calls` is missing, the connector was connected before they existed: disconnect and reconnect it.
+Confirm the MCP is connected. If the Voice Logica tools are missing, the connection is not signed in yet, and only the app can start that sign-in, so tell the user where to press Connect: ChatGPT: Plugins, Voice Logica, MCP servers, Connect on voice-logica, then a new chat; Claude: Customize, Connectors, Voice Logica, Connect; Cursor: Settings, MCP, voice-logica, Needs login. They sign in with their Voice Logica account in the window that opens. That Connect button is the only way in: signing in on app.voicelogica.ai by itself leaves the chat unconnected. Use an API key only if the client has no Connect flow. If `update_call_llm_instructions` or the `llmInstructionsStatus` filter of `get_calls` is missing, the connector was connected before they existed: disconnect and reconnect it.
 
 ## 1. Find the open ones
 
@@ -24,6 +24,8 @@ Each call returns `llmInstructions`:
 Calls where you asked and nobody replied yet are `waiting`, not `pending`: the filter leaves them out, so you never ask twice.
 
 It also returns `summary`, `contactId`, `phoneNumber`, `userId` / `userName` and `startAt`.
+
+`llmInstructions.memberInstructions` (when there): how that team member **always** wants it done, written by them in the app (Live Support → AI assistant → My instructions), plus rules you added earlier (lines starting with "-"). For example «email σε πελάτες: πάντα πρόχειρο», «υπογραφή: Μαρία, Πωλήσεις», which mailbox. They come before the defaults of this skill: «always a draft» means `draft: true` even when the dictation says «στείλε». The instructions on this call still win over them for this call.
 
 Nothing pending: say so in one line and stop. In a scheduled run, do nothing else: no other tool call, no task list. Most runs end here, and every extra step costs a full turn.
 
@@ -73,6 +75,7 @@ Never ask for something they did not ask you to include (a price, terms, a signa
 
 For the first two, ask the team member: `update_call_llm_instructions` with `callId`, `action: "ask"` and `text`, one clear question in their language that they can answer in a line, with the choices when you have them, e.g. «Ο Γιώργος έχει δύο email (giorgos@acme.gr, g.pap@gmail.com). Σε ποιο να στείλω την προσφορά;». Do first whatever part of the instructions you safely can, and say in the question what is already done. The call becomes `waiting`; when they reply it is `pending` again and a later run finds it with the reply in `messages`. Then finish the job and mark it `done`.
 
+- **Learn from corrections.** When a reply shows how they always want it, not just this time («πάντα draft», «μην στέλνεις ποτέ χωρίς να το δω», «υπόγραφε ως Χρήστος», «από το Gmail μου»), keep it: `update_call_llm_instructions` with `callId`, `action: "remember"` and `text` = the rule, one short line in their language. It is added to their instructions, they see it there and can delete it. Say it in the `done` result («Το κράτησα στις οδηγίες σας: πάντα πρόχειρο.»). Never remember one-off facts of this call (a name, an address, a price).
 - Ask once per open point. If `messages` already holds your question and their reply, do not ask the same thing again: act on the reply and finish the whole job (send, or save the draft) in that turn. A reply that corrects you («δεν έχει σχέση η yuboto», «είναι από Youbath») is an instruction: read the call again with it and do the job. Only if it still does not settle who to send to, `create_task` for them with what is missing and mark the call `done` with a result that says so.
 - When no tool can do what they asked, a question does not help: `create_task` (assigned as above) that says what they asked and why it could not be done, and mark the call `done` with a result that says so.
 - If `action: "ask"` is refused as an unknown action, the connector is older than this skill: `create_task` with what is missing instead, and mark the call `done`.
